@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pinterest Pin Generator</title>
+<style>
+:root{
+  --bg:#fff0f6;--card:#fff;--pink:#d96b9c;--pink2:#c75488;
+  --text:#3a2932;--muted:#8a5b70;--border:#edc9da;
+  --result:#fff7fa;--result-border:#f0d5e2;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--text);padding:32px 20px 48px;min-height:100vh}
+.wrap{max-width:620px;margin:auto}
+h1{font-family:Georgia,"Times New Roman",serif;text-align:center;font-size:40px;font-weight:400;color:#3a2430;margin:0 0 16px}
+.sub{text-align:center;color:var(--muted);font-size:15px;line-height:1.6;max-width:500px;margin:0 auto 36px}
+.card{background:#fff;border-radius:8px;border-top:4px solid var(--pink);box-shadow:0 2px 12px rgba(180,70,120,.08);padding:32px}
+label{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;color:#5a3d4b;margin-bottom:8px}
+.opt{font-weight:400;color:#a88c9a;letter-spacing:normal}
+.field{margin-bottom:20px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+input,select{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:5px;font-size:15px;background:#fff;color:var(--text);font-family:inherit;outline:none}
+input:focus,select:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(217,107,156,.12)}
+select{cursor:pointer}
+button.generate{width:100%;margin-top:12px;padding:15px;background:var(--pink);color:#fff;border:0;border-radius:5px;font-size:15px;font-weight:700;cursor:pointer}
+button.generate:hover{background:var(--pink2)}
+button.generate:disabled{background:#e6a8c4;cursor:default}
+.error{margin-top:14px;background:#fde5ef;color:#b83f70;padding:13px 16px;border-radius:5px;font-size:14px}
+.results{margin-top:28px;display:none}.results.show{display:block}
+.result-item{background:var(--result);border:1px solid var(--result-border);border-radius:6px;padding:16px 18px;margin-bottom:12px}
+.result-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.result-item h3{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--pink2);margin:0 0 8px;text-transform:uppercase}
+.txt{font-size:14.5px;line-height:1.55;color:var(--text);white-space:pre-wrap}
+.copy-btn{background:none;border:1px solid #e4b6ca;color:var(--pink2);font-size:12px;font-weight:600;padding:6px 12px;border-radius:4px;cursor:pointer}
+.copy-btn:hover{background:#fdebf3}
+.tag-pill{display:inline-block;background:#f9dce9;color:#a63f6d;font-size:12.5px;padding:4px 10px;border-radius:12px;margin:0 6px 6px 0}
+.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #f0d6e2;color:#b394a3;font-size:13px}
+.footer .name{color:#8a5b70;margin-bottom:4px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:600px){body{padding:24px 14px 40px}h1{font-size:32px}.card{padding:24px 20px}.row{grid-template-columns:1fr;gap:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Pinterest Pin Generator</h1>
+  <div class="sub">Type in any product and get a ready-to-post pin: hook title, description, CTA, disclosure, board names, and tags — copy each piece straight into Pinterest.</div>
+
+  <div class="card">
+    <div class="field">
+      <label>AMAZON PRODUCT OR NICHE</label>
+      <input id="product" type="text" placeholder="e.g. satin pajamas for women" onkeydown="if(event.key==='Enter'){event.preventDefault();generatePin()}">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>SOCIAL MEDIA <span class="opt">(optional)</span></label>
+        <select id="socialMedia">
+          <option value="">Select platform</option>
+          <option>Facebook</option>
+          <option>Instagram</option>
+          <option>TikTok</option>
+          <option>Shopify</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>TONE</label>
+        <select id="tone">
+          <option>Friendly and casual</option>
+          <option>Warm and encouraging</option>
+          <option>Playful and fun</option>
+          <option>Professional and informative</option>
+          <option>Urgent and persuasive</option>
+          <option>Minimal and modern</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="generate" id="genBtn" onclick="generatePin()">Generate pin content</button>
+    <div class="error" id="errorBox" style="display:none"></div>
+    <div class="results" id="results"></div>
+  </div>
+
+  <div class="footer">
+    <div class="name">Created by JOP</div>
+    <div>© 2026 All Rights Reserved.</div>
+  </div>
+</div>
+
+<script>
+/*
+  IMPORTANT:
+  Replace this with your deployed Cloudflare Worker URL.
+  Example:
+  const API_URL = "https://jop-pinterest-generator.YOURSUBDOMAIN.workers.dev";
+*/
+const API_URL = "PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE";
+
+async function generatePin(){
+  const product=document.getElementById("product").value.trim();
+  const socialMedia=document.getElementById("socialMedia").value;
+  const tone=document.getElementById("tone").value;
+  const btn=document.getElementById("genBtn");
+  const errorBox=document.getElementById("errorBox");
+  const results=document.getElementById("results");
+
+  errorBox.style.display="none";
+  results.classList.remove("show");
+  results.innerHTML="";
+
+  if(!product){
+    errorBox.textContent="Please enter a product or niche.";
+    errorBox.style.display="block";
+    return;
+  }
+
+  if(API_URL.includes("PASTE_YOUR")){
+    errorBox.textContent="The generator is not connected yet. Add your Cloudflare Worker URL to API_URL in index.html.";
+    errorBox.style.display="block";
+    return;
+  }
+
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span>Generating...';
+
+  try{
+    const response=await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({product,socialMedia,tone})
+    });
+
+    const data=await response.json().catch(()=>({}));
+
+    if(!response.ok){
+      throw new Error(data.error || `Server error (${response.status})`);
+    }
+
+    if(!data.content){
+      throw new Error("The AI returned no content.");
+    }
+
+    let clean=data.content.trim()
+      .replace(/^```json/i,"")
+      .replace(/^```/,"")
+      .replace(/```$/,"")
+      .trim();
+
+    const parsed=JSON.parse(clean);
+    renderResults(parsed);
+
+  }catch(err){
+    console.error(err);
+    errorBox.textContent="Generation failed: "+err.message;
+    errorBox.style.display="block";
+  }finally{
+    btn.disabled=false;
+    btn.textContent="Generate pin content";
+  }
+}
+
+function escapeHtml(str){
+  const div=document.createElement("div");
+  div.textContent=str||"";
+  return div.innerHTML;
+}
+
+function safeAttr(value){
+  return JSON.stringify(value||"")
+    .replace(/&/g,"&amp;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function copyText(text,btn){
+  const original=btn.textContent;
+  const done=()=>{btn.textContent="Copied!";setTimeout(()=>btn.textContent=original,1500)};
+  const fail=()=>{btn.textContent="Press Ctrl+C";setTimeout(()=>btn.textContent=original,2000)};
+
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done,fail));
+  }else{
+    fallbackCopy(text,done,fail);
+  }
+}
+
+function fallbackCopy(text,done,fail){
+  try{
+    const t=document.createElement("textarea");
+    t.value=text;t.style.position="fixed";t.style.left="-9999px";
+    document.body.appendChild(t);t.focus();t.select();
+    const ok=document.execCommand("copy");
+    document.body.removeChild(t);
+    ok?done():fail();
+  }catch(e){fail()}
+}
+
+function formatDescription(str){
+  let s=escapeHtml(str||"");
+  s=s.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+  const lines=s.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  return lines.map((line,i)=>{
+    if(/^-\s?/.test(line)) return `<div style="margin:2px 0">${line}</div>`;
+    return `<div style="margin:${i===0?"0":"14px"} 0 0">${line}</div>`;
+  }).join("");
+}
+
+function renderResults(data){
+  const results=document.getElementById("results");
+  results.innerHTML="";
+
+  const descOnly=data.descriptionOnly||"";
+  let full=[descOnly,data.cta,data.disclosure].filter(Boolean).join("\n\n");
+
+  if(full.length>500){
+    let trimmed=descOnly;
+    while(trimmed.length>0 && [trimmed,data.cta,data.disclosure].filter(Boolean).join("\n\n").length>500){
+      trimmed=trimmed.slice(0,-1);
+    }
+    full=[trimmed.trim(),data.cta,data.disclosure].filter(Boolean).join("\n\n");
+  }
+
+  const items=[
+    ["Pin Title",data.title,false],
+    ["Full Pin Description (Ready to Paste)",full,true],
+    ["Pinterest Description Only",descOnly,true],
+    ["Affiliate Link CTA",data.cta,false],
+    ["Affiliate Disclosure",data.disclosure,false],
+    ["Suggested Board Names",(data.boardNames||[]).join("\n"),false]
+  ];
+
+  items.forEach(([label,value,html])=>{
+    const div=document.createElement("div");
+    div.className="result-item";
+    div.innerHTML=`
+      <div class="result-head">
+        <h3>${label}</h3>
+        <button class="copy-btn" onclick="copyText(${safeAttr(value)},this)">Copy</button>
+      </div>
+      <div class="txt">${html?formatDescription(value):escapeHtml(value).replace(/\n/g,"<br>")}</div>
+    `;
+    results.appendChild(div);
+  });
+
+  const tags=(data.tags||[]).join(", ");
+  const tagDiv=document.createElement("div");
+  tagDiv.className="result-item";
+  tagDiv.innerHTML=`
+    <div class="result-head">
+      <h3>Search Terms for Pinterest's Tag Picker</h3>
+      <button class="copy-btn" onclick="copyText(${safeAttr(tags)},this)">Copy</button>
+    </div>
+    <div>${(data.tags||[]).map(t=>`<span class="tag-pill">${escapeHtml(t)}</span>`).join("")}</div>
+  `;
+  results.appendChild(tagDiv);
+  results.classList.add("show");
+}
+</script>
+</body>
+</html>
