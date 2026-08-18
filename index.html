@@ -1,0 +1,1527 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pinterest Pin Generator</title>
+
+<style>
+  :root {
+    --bg: #fff0f6;
+    --card-bg: #ffffff;
+    --card-border-top: #d96b9c;
+    --card-shadow: rgba(180, 70, 120, 0.08);
+
+    --heading-color: #3a2430;
+    --sub-color: #8a5b70;
+    --label-color: #5a3d4b;
+    --opt-color: #a88c9a;
+
+    --input-border: #edc9da;
+    --input-bg: #ffffff;
+    --input-text: #3a2932;
+
+    --accent: #d96b9c;
+    --accent-hover: #c75488;
+    --accent-disabled: #e6a8c4;
+    --button-text: #ffffff;
+
+    --error-bg: #fde5ef;
+    --error-text: #b83f70;
+
+    --footer-color: #b394a3;
+    --footer-strong: #8a5b70;
+    --footer-border: #f0d6e2;
+
+    --result-bg: #fff7fa;
+    --result-border: #f0d5e2;
+    --result-label: #c75488;
+    --result-text: #3a2932;
+
+    --copy-border: #e4b6ca;
+    --copy-hover-bg: #fdebf3;
+
+    --tag-bg: #f9dce9;
+    --tag-text: #a63f6d;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    font-family:
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Helvetica,
+      Arial,
+      sans-serif;
+    color: var(--input-text);
+    padding: 32px 20px 48px;
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 620px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    text-align: center;
+    font-size: 40px;
+    font-weight: 400;
+    color: var(--heading-color);
+    margin: 0 0 16px;
+  }
+
+  .sub {
+    text-align: center;
+    color: var(--sub-color);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 500px;
+    margin: 0 auto 36px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: 8px;
+    border-top: 4px solid var(--card-border-top);
+    box-shadow: 0 2px 12px var(--card-shadow);
+    padding: 32px;
+  }
+
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--label-color);
+    margin-bottom: 8px;
+  }
+
+  label .opt {
+    font-weight: 400;
+    color: var(--opt-color);
+    letter-spacing: normal;
+  }
+
+  .field {
+    margin-bottom: 20px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  input[type="text"],
+  select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    font-size: 15px;
+    background: var(--input-bg);
+    color: var(--input-text);
+    font-family: inherit;
+    outline: none;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+  }
+
+  input[type="text"]:focus,
+  select:focus {
+    border-color: var(--accent);
+    box-shadow:
+      0 0 0 3px rgba(217, 107, 156, 0.12);
+  }
+
+  select {
+    cursor: pointer;
+  }
+
+  button.generate {
+    width: 100%;
+    margin-top: 12px;
+    padding: 15px;
+    background: var(--accent);
+    color: var(--button-text);
+    border: none;
+    border-radius: 5px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background 0.15s,
+      transform 0.1s;
+  }
+
+  button.generate:hover {
+    background: var(--accent-hover);
+  }
+
+  button.generate:active {
+    transform: translateY(1px);
+  }
+
+  button.generate:disabled {
+    background: var(--accent-disabled);
+    cursor: default;
+    transform: none;
+  }
+
+  .error {
+    margin-top: 14px;
+    background: var(--error-bg);
+    color: var(--error-text);
+    padding: 13px 16px;
+    border-radius: 5px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .results {
+    margin-top: 28px;
+    display: none;
+  }
+
+  .results.show {
+    display: block;
+  }
+
+  .result-item {
+    background: var(--result-bg);
+    border: 1px solid var(--result-border);
+    border-radius: 6px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+
+  .result-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .result-item h3 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--result-label);
+    margin: 0 0 8px;
+    text-transform: uppercase;
+  }
+
+  .char-count {
+    font-size: 12px;
+    color: var(--opt-color);
+    margin: -3px 0 8px;
+  }
+
+  .char-count.over {
+    color: var(--error-text);
+    font-weight: 700;
+  }
+
+  .txt {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--result-text);
+    white-space: pre-wrap;
+  }
+
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--copy-border);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .copy-btn:hover {
+    background: var(--copy-hover-bg);
+  }
+
+  .tag-pill {
+    display: inline-block;
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    font-size: 12.5px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    margin: 0 6px 6px 0;
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--footer-border);
+    color: var(--footer-color);
+    font-size: 13px;
+  }
+
+  .footer .name {
+    color: var(--footer-strong);
+    margin-bottom: 4px;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 600px) {
+    body {
+      padding: 24px 14px 40px;
+    }
+
+    h1 {
+      font-size: 32px;
+    }
+
+    .card {
+      padding: 24px 20px;
+    }
+
+    .row {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+  <h1>Pinterest Pin Generator</h1>
+
+  <div class="sub">
+    Type in any product and get a ready-to-post pin: hook title,
+    description, CTA, disclosure, board names, and tags — copy each
+    piece straight into Pinterest.
+  </div>
+
+  <div class="card">
+
+    <!-- PRODUCT -->
+    <div class="field">
+
+      <label>
+        AMAZON PRODUCT OR NICHE
+      </label>
+
+      <input
+        type="text"
+        id="product"
+        placeholder="e.g. satin pajamas for women"
+        onkeydown="
+          if(event.key === 'Enter'){
+            event.preventDefault();
+            generatePin();
+          }
+        "
+      >
+
+    </div>
+
+
+    <!-- SOCIAL MEDIA + TONE -->
+    <div class="row">
+
+      <div class="field">
+
+        <label>
+          SOCIAL MEDIA
+          <span class="opt">(optional)</span>
+        </label>
+
+        <select id="socialMedia">
+
+          <option value="">
+            Select platform
+          </option>
+
+          <option value="Facebook">
+            Facebook
+          </option>
+
+          <option value="Instagram">
+            Instagram
+          </option>
+
+          <option value="TikTok">
+            TikTok
+          </option>
+
+          <option value="Shopify">
+            Shopify
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          TONE
+        </label>
+
+        <select id="tone">
+
+          <option value="Friendly and casual">
+            Friendly and casual
+          </option>
+
+          <option value="Warm and encouraging">
+            Warm and encouraging
+          </option>
+
+          <option value="Playful and fun">
+            Playful and fun
+          </option>
+
+          <option value="Professional and informative">
+            Professional and informative
+          </option>
+
+          <option value="Urgent and persuasive">
+            Urgent and persuasive
+          </option>
+
+          <option value="Minimal and modern">
+            Minimal and modern
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <!-- GENERATE -->
+    <button
+      class="generate"
+      id="genBtn"
+      onclick="generatePin()"
+    >
+      Generate pin content
+    </button>
+
+
+    <!-- ERROR -->
+    <div
+      class="error"
+      id="errorBox"
+      style="display:none;"
+    ></div>
+
+
+    <!-- RESULTS -->
+    <div
+      class="results"
+      id="results"
+    ></div>
+
+  </div>
+
+
+  <!-- FOOTER -->
+  <div class="footer">
+
+    <div class="name">
+      Created by JOP
+    </div>
+
+    <div>
+      © 2026 All Rights Reserved.
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+/*
+==========================================================
+ GOOGLE APPS SCRIPT WEB APP URL
+==========================================================
+
+IMPORTANT:
+
+Replace the URL below with the Web App URL you received
+when you deployed your Google Apps Script.
+
+It should look similar to:
+
+https://script.google.com/macros/s/XXXXXXXXXXXX/exec
+
+Do NOT put your Gemini API key here.
+==========================================================
+*/
+
+const APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbwM1x7o106My4vw_Ivd9QWiTVT7tmLeh4PqD0VIrMzEQWeiHW4PwV9UbfxqyOcNmjC7zg/exec";
+
+
+/*
+==========================================================
+ GENERATE PIN
+==========================================================
+*/
+
+function generatePin() {
+
+  const product =
+    document
+      .getElementById("product")
+      .value
+      .trim();
+
+
+  const socialMedia =
+    document
+      .getElementById("socialMedia")
+      .value;
+
+
+  const tone =
+    document
+      .getElementById("tone")
+      .value;
+
+
+  const btn =
+    document.getElementById("genBtn");
+
+
+  const errorBox =
+    document.getElementById("errorBox");
+
+
+  const results =
+    document.getElementById("results");
+
+
+  /*
+  Clear previous results
+  */
+
+  errorBox.style.display =
+    "none";
+
+  results.classList.remove(
+    "show"
+  );
+
+  results.innerHTML =
+    "";
+
+
+  /*
+  Check product
+  */
+
+  if (!product) {
+
+    errorBox.textContent =
+      "Please enter a product or niche.";
+
+    errorBox.style.display =
+      "block";
+
+    return;
+
+  }
+
+
+  /*
+  Check Apps Script URL
+  */
+
+  if (
+    APPS_SCRIPT_URL.includes(
+      "PASTE_YOUR_"
+    )
+  ) {
+
+    errorBox.textContent =
+      "The generator is not connected yet. Please add your Google Apps Script Web App URL inside index.html.";
+
+    errorBox.style.display =
+      "block";
+
+    return;
+
+  }
+
+
+  /*
+  Loading state
+  */
+
+  btn.disabled =
+    true;
+
+  btn.innerHTML =
+    '<span class="spinner"></span>Generating...';
+
+
+  /*
+  Create unique JSONP callback
+  */
+
+  const callbackName =
+    "jopPinCallback_" +
+    Date.now();
+
+
+  let finished =
+    false;
+
+
+  /*
+  Callback from Google Apps Script
+  */
+
+  window[callbackName] =
+    function(payload) {
+
+      finished =
+        true;
+
+
+      cleanup();
+
+
+      if (
+        payload &&
+        payload.ok &&
+        payload.content
+      ) {
+
+        try {
+
+          let clean =
+            payload.content
+              .trim()
+              .replace(
+                /^```json/i,
+                ""
+              )
+              .replace(
+                /^```/,
+                ""
+              )
+              .replace(
+                /```$/,
+                ""
+              )
+              .trim();
+
+
+          const parsed =
+            JSON.parse(clean);
+
+
+          renderResults(
+            parsed
+          );
+
+
+        } catch (error) {
+
+          showError(
+            "The AI returned invalid content. Please try again."
+          );
+
+        }
+
+      } else {
+
+        showError(
+          payload &&
+          payload.error
+            ? payload.error
+            : "Generation failed. Please try again."
+        );
+
+      }
+
+
+      btn.disabled =
+        false;
+
+      btn.innerHTML =
+        "Generate pin content";
+
+    };
+
+
+  /*
+  Create script request
+
+  JSONP is used because GitHub Pages and
+  Google Apps Script are different domains.
+  */
+
+  const script =
+    document.createElement(
+      "script"
+    );
+
+
+  script.id =
+    callbackName;
+
+
+  script.src =
+    APPS_SCRIPT_URL +
+    "?callback=" +
+    encodeURIComponent(
+      callbackName
+    ) +
+    "&product=" +
+    encodeURIComponent(
+      product
+    ) +
+    "&socialMedia=" +
+    encodeURIComponent(
+      socialMedia
+    ) +
+    "&tone=" +
+    encodeURIComponent(
+      tone
+    );
+
+
+  /*
+  Connection error
+  */
+
+  script.onerror =
+    function() {
+
+      if (finished) {
+        return;
+      }
+
+
+      cleanup();
+
+
+      showError(
+        "Could not connect to Google Apps Script. Please check that your Web App is deployed as 'Anyone' and that the URL in index.html is correct."
+      );
+
+
+      btn.disabled =
+        false;
+
+      btn.innerHTML =
+        "Generate pin content";
+
+    };
+
+
+  document.body.appendChild(
+    script
+  );
+
+
+  /*
+  Timeout protection
+  */
+
+  setTimeout(
+    function() {
+
+      if (!finished) {
+
+        cleanup();
+
+
+        showError(
+          "The request timed out. Please try again."
+        );
+
+
+        btn.disabled =
+          false;
+
+        btn.innerHTML =
+          "Generate pin content";
+
+      }
+
+    },
+    60000
+  );
+
+
+  /*
+  Remove script and callback
+  */
+
+  function cleanup() {
+
+    const scriptElement =
+      document.getElementById(
+        callbackName
+      );
+
+
+    if (scriptElement) {
+
+      scriptElement.remove();
+
+    }
+
+
+    try {
+
+      delete window[
+        callbackName
+      ];
+
+    } catch (e) {}
+
+  }
+
+}
+
+
+/*
+==========================================================
+ ERROR
+==========================================================
+*/
+
+function showError(
+  message
+) {
+
+  const errorBox =
+    document.getElementById(
+      "errorBox"
+    );
+
+
+  errorBox.textContent =
+    message;
+
+
+  errorBox.style.display =
+    "block";
+
+}
+
+
+/*
+==========================================================
+ ESCAPE HTML
+==========================================================
+*/
+
+function escapeHtml(
+  str
+) {
+
+  const div =
+    document.createElement(
+      "div"
+    );
+
+
+  div.textContent =
+    str || "";
+
+
+  return div.innerHTML;
+
+}
+
+
+/*
+==========================================================
+ SAFE COPY ATTRIBUTE
+==========================================================
+*/
+
+function safeAttr(
+  value
+) {
+
+  return JSON
+    .stringify(
+      value || ""
+    )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#39;"
+    );
+
+}
+
+
+/*
+==========================================================
+ COPY BUTTON
+==========================================================
+*/
+
+function copyText(
+  text,
+  btn
+) {
+
+  const original =
+    btn.textContent;
+
+
+  function copied() {
+
+    btn.textContent =
+      "Copied!";
+
+
+    setTimeout(
+      function() {
+
+        btn.textContent =
+          original;
+
+      },
+      1500
+    );
+
+  }
+
+
+  function failed() {
+
+    btn.textContent =
+      "Press Ctrl+C";
+
+
+    setTimeout(
+      function() {
+
+        btn.textContent =
+          original;
+
+      },
+      2000
+    );
+
+  }
+
+
+  if (
+    navigator.clipboard &&
+    window.isSecureContext
+  ) {
+
+    navigator.clipboard
+      .writeText(text)
+      .then(copied)
+      .catch(
+        function() {
+
+          fallbackCopy(
+            text,
+            copied,
+            failed
+          );
+
+        }
+      );
+
+  } else {
+
+    fallbackCopy(
+      text,
+      copied,
+      failed
+    );
+
+  }
+
+}
+
+
+/*
+==========================================================
+ FALLBACK COPY
+==========================================================
+*/
+
+function fallbackCopy(
+  text,
+  success,
+  failure
+) {
+
+  try {
+
+    const textarea =
+      document.createElement(
+        "textarea"
+      );
+
+
+    textarea.value =
+      text;
+
+
+    textarea.style.position =
+      "fixed";
+
+    textarea.style.left =
+      "-9999px";
+
+
+    document.body.appendChild(
+      textarea
+    );
+
+
+    textarea.focus();
+
+    textarea.select();
+
+
+    const copied =
+      document.execCommand(
+        "copy"
+      );
+
+
+    textarea.remove();
+
+
+    if (copied) {
+
+      success();
+
+    } else {
+
+      failure();
+
+    }
+
+  } catch (error) {
+
+    failure();
+
+  }
+
+}
+
+
+/*
+==========================================================
+ FORMAT DESCRIPTION
+==========================================================
+*/
+
+function formatDescription(
+  str
+) {
+
+  let html =
+    escapeHtml(
+      str || ""
+    );
+
+
+  /*
+  Convert **text** to bold
+  */
+
+  html =
+    html.replace(
+      /\*\*(.+?)\*\*/g,
+      "<strong>$1</strong>"
+    );
+
+
+  const lines =
+    html
+      .split(/\n+/)
+      .map(
+        function(line) {
+          return line.trim();
+        }
+      )
+      .filter(
+        function(line) {
+          return line.length;
+        }
+      );
+
+
+  let output =
+    "";
+
+
+  lines.forEach(
+    function(line, index) {
+
+      const bullet =
+        /^-\s?/.test(line);
+
+
+      if (bullet) {
+
+        output +=
+          '<div style="margin:2px 0;">' +
+          line +
+          "</div>";
+
+      } else {
+
+        output +=
+          '<div style="margin:' +
+          (
+            index === 0
+              ? "0"
+              : "14px"
+          ) +
+          ' 0 0 0;">' +
+          line +
+          "</div>";
+
+      }
+
+    }
+  );
+
+
+  return output;
+
+}
+
+
+/*
+==========================================================
+ RENDER RESULTS
+==========================================================
+*/
+
+function renderResults(
+  data
+) {
+
+  const results =
+    document.getElementById(
+      "results"
+    );
+
+
+  results.innerHTML =
+    "";
+
+
+  /*
+  Description
+  */
+
+  const descriptionOnly =
+    data.descriptionOnly ||
+    "";
+
+
+  /*
+  Build full description
+  */
+
+  let fullDescription =
+    [
+      descriptionOnly,
+      data.cta,
+      data.disclosure
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+
+
+  /*
+  Make sure full description
+  stays under 500 characters
+  */
+
+  if (
+    fullDescription.length > 500
+  ) {
+
+    let shortened =
+      descriptionOnly;
+
+
+    while (
+      shortened.length > 0 &&
+      [
+        shortened,
+        data.cta,
+        data.disclosure
+      ]
+        .filter(Boolean)
+        .join("\n\n")
+        .length > 500
+    ) {
+
+      shortened =
+        shortened.slice(
+          0,
+          -1
+        );
+
+    }
+
+
+    fullDescription =
+      [
+        shortened.trim(),
+        data.cta,
+        data.disclosure
+      ]
+        .filter(Boolean)
+        .join("\n\n");
+
+  }
+
+
+  const characterCount =
+    fullDescription.length;
+
+
+  const overLimit =
+    characterCount > 500;
+
+
+  /*
+  Result items
+  */
+
+  const items = [
+
+    {
+      label:
+        "Pin Title",
+
+      value:
+        data.title || "",
+
+      html:
+        false
+
+    },
+
+    {
+      label:
+        "Full Pin Description (Ready to Paste)",
+
+      value:
+        fullDescription,
+
+      html:
+        true,
+
+      count:
+        characterCount
+
+    },
+
+    {
+      label:
+        "Pinterest Description Only",
+
+      value:
+        descriptionOnly,
+
+      html:
+        true
+
+    },
+
+    {
+      label:
+        "Affiliate Link CTA",
+
+      value:
+        data.cta || "",
+
+      html:
+        false
+
+    },
+
+    {
+      label:
+        "Affiliate Disclosure",
+
+      value:
+        data.disclosure || "",
+
+      html:
+        false
+
+    },
+
+    {
+      label:
+        "Suggested Board Names",
+
+      value:
+        (
+          data.boardNames || []
+        ).join("\n"),
+
+      html:
+        false
+
+    }
+
+  ];
+
+
+  /*
+  Render each item
+  */
+
+  items.forEach(
+    function(item) {
+
+      const div =
+        document.createElement(
+          "div"
+        );
+
+
+      div.className =
+        "result-item";
+
+
+      let countHtml =
+        "";
+
+
+      if (
+        typeof item.count !==
+        "undefined"
+      ) {
+
+        countHtml =
+          '<div class="char-count ' +
+          (
+            overLimit
+              ? "over"
+              : ""
+          ) +
+          '">' +
+          item.count +
+          " / 500 characters" +
+          "</div>";
+
+      }
+
+
+      const body =
+        item.html
+          ? formatDescription(
+              item.value
+            )
+          : escapeHtml(
+              item.value
+            ).replace(
+              /\n/g,
+              "<br>"
+            );
+
+
+      div.innerHTML = `
+
+        <div class="result-head">
+
+          <div>
+
+            <h3>
+              ${escapeHtml(item.label)}
+            </h3>
+
+            ${countHtml}
+
+          </div>
+
+          <button
+            class="copy-btn"
+            onclick="copyText(
+              ${safeAttr(item.value)},
+              this
+            )"
+          >
+            Copy
+          </button>
+
+        </div>
+
+        <div class="txt">
+          ${body}
+        </div>
+
+      `;
+
+
+      results.appendChild(
+        div
+      );
+
+    }
+  );
+
+
+  /*
+  Tags
+  */
+
+  const tags =
+    data.tags || [];
+
+
+  const tagsText =
+    tags.join(", ");
+
+
+  const tagsDiv =
+    document.createElement(
+      "div"
+    );
+
+
+  tagsDiv.className =
+    "result-item";
+
+
+  tagsDiv.innerHTML = `
+
+    <div class="result-head">
+
+      <h3>
+        Search Terms for Pinterest's Tag Picker
+      </h3>
+
+      <button
+        class="copy-btn"
+        onclick="copyText(
+          ${safeAttr(tagsText)},
+          this
+        )"
+      >
+        Copy
+      </button>
+
+    </div>
+
+    <div>
+
+      ${
+
+        tags
+          .map(
+            function(tag) {
+
+              return `
+                <span class="tag-pill">
+                  ${escapeHtml(tag)}
+                </span>
+              `;
+
+            }
+          )
+          .join("")
+
+      }
+
+    </div>
+
+  `;
+
+
+  results.appendChild(
+    tagsDiv
+  );
+
+
+  /*
+  Show results
+  */
+
+  results.classList.add(
+    "show"
+  );
+
+
+  /*
+  Scroll to results
+  */
+
+  setTimeout(
+    function() {
+
+      results.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+    },
+    100
+  );
+
+}
+
+</script>
+
+</body>
+</html>
