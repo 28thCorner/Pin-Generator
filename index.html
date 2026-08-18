@@ -42,8 +42,8 @@ const sets=[
 {keys:["toy","doll","princess","costume","kids","baby","girl","boy"],cat:"Kids Finds",benef:["fun","great for play"],uses:["Pretend play","Birthdays","Gift giving"],boards:["Kids Gift Ideas","Kids Favorites","Pretend Play","Birthday Ideas","Fun Finds"],tags:["Kids","Toys","Gifts","Play","Birthday","Shopping","Family","Children","Fun"]},
 {keys:["christmas","halloween","valentine","easter","party","gift"],cat:"Gifts",benef:["giftable","fun to share"],uses:["Gift giving","Celebrations","Special occasions"],boards:["Gift Ideas","Holiday Finds","Shopping Inspiration","Gift Guide","Special Occasions"],tags:["Gifts","Holiday","Shopping","Ideas","Celebration","Lifestyle","Favorites","Inspiration","Presents"]}
 ];
-const fallback={cat:"Everyday Finds",benef:["practical","easy to use"],uses:["Everyday routines","Busy days","Gift giving"],boards:["Amazon Finds","Everyday Essentials","Useful Finds","Shopping Favorites","Product Inspiration"],tags:["Shopping","Amazon","Finds","Lifestyle","Essentials","Favorites","Ideas","Products","Gifts"]};
-function getSet(p){p=p.toLowerCase();return sets.find(x=>x.keys.some(k=>p.includes(k)))||fallback}
+const defaultSet={cat:"Everyday Finds",benef:["practical","easy to use"],uses:["Everyday routines","Busy days","Gift giving"],boards:["Amazon Finds","Everyday Essentials","Useful Finds","Shopping Favorites","Product Inspiration"],tags:["Shopping","Amazon","Finds","Lifestyle","Essentials","Favorites","Ideas","Products","Gifts"]};
+function getSet(p){p=p.toLowerCase();return sets.find(x=>x.keys.some(k=>p.includes(k)))||defaultSet}
 function clean(p){return p.replace(/\s+/g," ").trim()}
 function cap(s){return s.replace(/\b\w/g,m=>m.toUpperCase())}
 function generatePin(){
@@ -66,8 +66,8 @@ btn.disabled=false;btn.textContent="Generate pin content";
 }
 function escapeHtml(s){const d=document.createElement("div");d.textContent=s||"";return d.innerHTML}
 function safeAttr(s){return JSON.stringify(s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}
-function copyText(text,btn){const old=btn.textContent,ok=()=>{btn.textContent="Copied!";setTimeout(()=>btn.textContent=old,1500)},bad=()=>{btn.textContent="Press Ctrl+C";setTimeout(()=>btn.textContent=old,2000)};if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(text).then(ok).catch(()=>fallback(text,ok,bad));else fallback(text,ok,bad)}
-function fallback(text,ok,bad){try{const t=document.createElement("textarea");t.value=text;t.style.position="fixed";t.style.left="-9999px";document.body.appendChild(t);t.focus();t.select();const good=document.execCommand("copy");t.remove();good?ok():bad()}catch(e){bad()}}
+function copyText(text,btn){const old=btn.textContent,ok=()=>{btn.textContent="Copied!";setTimeout(()=>btn.textContent=old,1500)},bad=()=>{btn.textContent="Press Ctrl+C";setTimeout(()=>btn.textContent=old,2000)};if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(text).then(ok).catch(()=>fallbackCopy(text,ok,bad));else fallbackCopy(text,ok,bad)}
+function fallbackCopy(text,ok,bad){try{const t=document.createElement("textarea");t.value=text;t.style.position="fixed";t.style.left="-9999px";document.body.appendChild(t);t.focus();t.select();const good=document.execCommand("copy");t.remove();good?ok():bad()}catch(e){bad()}}
 function format(s){let x=escapeHtml(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");return x.split(/\n+/).filter(Boolean).map((l,i)=>/^-\s?/.test(l)?`<div style="margin:2px 0">${l}</div>`:`<div style="margin:${i?"14px":"0"} 0 0">${l}</div>`).join("")}
 function render(d){
 const r=document.getElementById("results");r.innerHTML="";const full=[d.descriptionOnly,d.cta,d.disclosure].filter(Boolean).join("\n\n"),items=[["Pin Title",d.title,false],["Full Pin Description (Ready to Paste)",full,true],["Pinterest Description Only",d.descriptionOnly,true],["Affiliate Link CTA",d.cta,false],["Affiliate Disclosure",d.disclosure,false],["Suggested Board Names",(d.boardNames||[]).join("\n"),false]];
