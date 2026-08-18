@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JOP Pinterest Pin Generator</title>
+<style>
+:root{--bg:#fff0f6;--card:#fff;--pink:#d96b9c;--pink2:#c75488;--text:#3a2932;--muted:#8a5b70;--border:#edc9da;--result:#fff7fa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--text);padding:32px 20px 48px;min-height:100vh}.wrap{max-width:620px;margin:auto}h1{font-family:Georgia,serif;text-align:center;font-size:40px;font-weight:400;color:#3a2430;margin:0 0 16px}.sub{text-align:center;color:var(--muted);font-size:15px;line-height:1.6;max-width:500px;margin:0 auto 36px}.card{background:#fff;border-radius:8px;border-top:4px solid var(--pink);box-shadow:0 2px 12px rgba(180,70,120,.08);padding:32px}label{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;color:#5a3d4b;margin-bottom:8px}.opt{font-weight:400;color:#a88c9a;letter-spacing:normal}.field{margin-bottom:20px}.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}input,select{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:5px;font-size:15px;background:#fff;color:var(--text);font-family:inherit;outline:0}input:focus,select:focus{border-color:var(--pink);box-shadow:0 0 0 3px #d96b9c20}select{cursor:pointer}button.generate{width:100%;margin-top:12px;padding:15px;background:var(--pink);color:#fff;border:0;border-radius:5px;font-size:15px;font-weight:700;cursor:pointer}button.generate:hover{background:var(--pink2)}button.generate:disabled{opacity:.65;cursor:default}.results{margin-top:28px;display:none}.results.show{display:block}.result-item{background:var(--result);border:1px solid #f0d5e2;border-radius:6px;padding:16px 18px;margin-bottom:12px}.result-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.result-item h3{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--pink2);margin:0 0 8px;text-transform:uppercase}.txt{font-size:14.5px;line-height:1.55;white-space:pre-wrap}.count{font-size:12px;color:#a88c9a;margin:-3px 0 8px}.copy-btn{background:none;border:1px solid #e4b6ca;color:var(--pink2);font-size:12px;font-weight:600;padding:6px 12px;border-radius:4px;cursor:pointer}.copy-btn:hover{background:#fdebf3}.tag-pill{display:inline-block;background:#f9dce9;color:#a63f6d;font-size:12.5px;padding:4px 10px;border-radius:12px;margin:0 6px 6px 0}.error{margin-top:14px;background:#fde5ef;color:#b83f70;padding:13px 16px;border-radius:5px;font-size:14px}.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #f0d6e2;color:#b394a3;font-size:13px}.footer .name{color:#8a5b70;margin-bottom:4px}@media(max-width:600px){body{padding:24px 14px 40px}h1{font-size:32px}.card{padding:24px 20px}.row{grid-template-columns:1fr;gap:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Pinterest Pin Generator</h1>
+<div class="sub">Create ready-to-post Pinterest content directly in your browser. No Anthropic API, Gemini API, Cloudflare, Google Apps Script, or API key is required.</div>
+<div class="card">
+<div class="field"><label>AMAZON PRODUCT OR NICHE</label><input id="product" type="text" placeholder="e.g. satin pajamas for women" onkeydown="if(event.key==='Enter'){event.preventDefault();generatePin()}"></div>
+<div class="row">
+<div class="field"><label>SOCIAL MEDIA <span class="opt">(optional)</span></label><select id="socialMedia"><option value="">Select platform</option><option>Facebook</option><option>Instagram</option><option>TikTok</option><option>Shopify</option></select></div>
+<div class="field"><label>TONE</label><select id="tone"><option>Friendly and casual</option><option>Warm and encouraging</option><option>Playful and fun</option><option>Professional and informative</option><option>Urgent and persuasive</option><option>Minimal and modern</option></select></div>
+</div>
+<button class="generate" id="genBtn" onclick="generatePin()">Generate pin content</button>
+<div class="error" id="errorBox" style="display:none"></div><div class="results" id="results"></div>
+</div>
+<div class="footer"><div class="name">Created by JOP</div><div>© 2026 All Rights Reserved.</div></div>
+</div>
+<script>
+const hooks=["Looking for an easier way to make everyday life feel a little better? ✨","Sometimes the right little find makes a big difference. 💕","Need something practical that still feels stylish?","Your next everyday favorite might be simpler than you think. ✨","Want a product that makes getting ready feel easier?","Small upgrade, big everyday difference. 💕","Have you found your new everyday essential yet?"];
+const ctas=["🛒 Check the link for yours!","🛒 Tap the link to see it!","🛒 Take a look and shop it!","🛒 Head to the link to explore!","🛒 Click through to check it out!","🛒 Follow the link for more!","🛒 See the link and discover yours!"];
+const sets=[
+{keys:["shoe","sneaker","boot","loafer","sandal","flat","heel"],cat:"Shoes",benef:["comfortable","easy to style"],uses:["Everyday outfits","Work days","Weekend plans"],boards:["Everyday Shoe Finds","Comfortable Shoes","Casual Style","Wardrobe Essentials","Fashion Favorites"],tags:["Shoes","Footwear","Fashion","Style","Outfits","Comfort","Shopping","Wardrobe","Accessories"]},
+{keys:["bag","purse","tote","crossbody","backpack","handbag","clutch"],cat:"Bags",benef:["easy to carry","versatile"],uses:["Daily errands","Work days","Weekend trips"],boards:["Handbag Finds","Everyday Bags","Fashion Accessories","Style Inspiration","Wardrobe Essentials"],tags:["Bags","Handbags","Fashion","Accessories","Style","Outfits","Shopping","Wardrobe","Travel"]},
+{keys:["dress","skirt","top","shirt","blouse","jeans","pants","shorts","jacket","cardigan","sweater","hoodie","clothing","outfit","pajama","sleepwear"],cat:"Fashion",benef:["easy to wear","simple to style"],uses:["Everyday outfits","Work looks","Weekend plans"],boards:["Everyday Fashion","Outfit Ideas","Style Inspiration","Wardrobe Essentials","Fashion Finds"],tags:["Fashion","Outfits","Style","Clothing","Wardrobe","Shopping","Trends","Beauty","Lifestyle"]},
+{keys:["watch"],cat:"Watches",benef:["polished","easy to pair"],uses:["Daily wear","Work outfits","Special occasions"],boards:["Watch Style","Fashion Accessories","Everyday Accessories","Gift Ideas","Style Inspiration"],tags:["Watches","Accessories","Fashion","Style","Gifts","Shopping","Outfits","Lifestyle","Trends"]},
+{keys:["wallet","cardholder"],cat:"Wallets",benef:["organized","easy to carry"],uses:["Everyday use","Travel days","Gift giving"],boards:["Wallet Finds","Everyday Essentials","Gift Ideas","Fashion Accessories","Useful Finds"],tags:["Wallets","Accessories","Gifts","Fashion","Shopping","Travel","Style","Essentials","Lifestyle"]},
+{keys:["perfume","fragrance","cologne","body mist"],cat:"Fragrance",benef:["fresh","easy to wear"],uses:["Daily routines","Date nights","Gift giving"],boards:["Fragrance Favorites","Beauty Finds","Self Care","Gift Ideas","Beauty Essentials"],tags:["Perfume","Beauty","Fragrance","Gifts","Skincare","SelfCare","Shopping","Lifestyle","BeautyTips"]},
+{keys:["skincare","serum","moisturizer","cleanser","lotion","cream","sunscreen"],cat:"Skincare",benef:["easy to use","great for routines"],uses:["Morning routines","Night routines","Self care"],boards:["Skincare Finds","Beauty Essentials","Self Care","Beauty Favorites","Daily Routines"],tags:["Skincare","Beauty","SelfCare","Routine","Glow","Shopping","Lifestyle","BeautyTips","Wellness"]},
+{keys:["makeup","lipstick","mascara","foundation","eyeliner","blush"],cat:"Makeup",benef:["easy to use","great for everyday looks"],uses:["Daily makeup","Date nights","Special occasions"],boards:["Makeup Finds","Beauty Favorites","Everyday Makeup","Beauty Inspiration","Self Care"],tags:["Makeup","Beauty","Cosmetics","Style","Shopping","BeautyTips","Lifestyle","Glam","SelfCare"]},
+{keys:["kitchen","cookware","pan","pot","bottle","mug","tumbler","water bottle","organizer"],cat:"Home Finds",benef:["practical","easy to use"],uses:["Daily routines","Kitchen tasks","Home organization"],boards:["Home Finds","Kitchen Favorites","Home Organization","Useful Products","Everyday Essentials"],tags:["Home","Kitchen","Organization","Decor","Shopping","Essentials","Lifestyle","Storage","HomeIdeas"]},
+{keys:["decor","pillow","blanket","candle","lamp","rug","plant","vase"],cat:"Home Decor",benef:["adds a cozy touch","easy to style"],uses:["Living spaces","Bedrooms","Home refreshes"],boards:["Home Decor Ideas","Cozy Home","Interior Inspiration","Home Finds","Decor Favorites"],tags:["Decor","Home","Interior","Lifestyle","Cozy","Shopping","HomeIdeas","Design","Inspiration"]},
+{keys:["fitness","workout","yoga","dumbbell","resistance","gym","exercise","massage gun"],cat:"Fitness",benef:["easy to use","convenient"],uses:["Home workouts","Gym sessions","Active routines"],boards:["Fitness Finds","Home Workout","Workout Essentials","Healthy Lifestyle","Gym Inspiration"],tags:["Fitness","Workout","Exercise","Gym","Wellness","Lifestyle","Health","Training","Active"]},
+{keys:["toy","doll","princess","costume","kids","baby","girl","boy"],cat:"Kids Finds",benef:["fun","great for play"],uses:["Pretend play","Birthdays","Gift giving"],boards:["Kids Gift Ideas","Kids Favorites","Pretend Play","Birthday Ideas","Fun Finds"],tags:["Kids","Toys","Gifts","Play","Birthday","Shopping","Family","Children","Fun"]},
+{keys:["christmas","halloween","valentine","easter","party","gift"],cat:"Gifts",benef:["giftable","fun to share"],uses:["Gift giving","Celebrations","Special occasions"],boards:["Gift Ideas","Holiday Finds","Shopping Inspiration","Gift Guide","Special Occasions"],tags:["Gifts","Holiday","Shopping","Ideas","Celebration","Lifestyle","Favorites","Inspiration","Presents"]}
+];
+const defaultSet={cat:"Everyday Finds",benef:["practical","easy to use"],uses:["Everyday routines","Busy days","Gift giving"],boards:["Amazon Finds","Everyday Essentials","Useful Finds","Shopping Favorites","Product Inspiration"],tags:["Shopping","Amazon","Finds","Lifestyle","Essentials","Favorites","Ideas","Products","Gifts"]};
+function getSet(p){p=p.toLowerCase();return sets.find(x=>x.keys.some(k=>p.includes(k)))||defaultSet}
+function clean(p){return p.replace(/\s+/g," ").trim()}
+function cap(s){return s.replace(/\b\w/g,m=>m.toUpperCase())}
+function generatePin(){
+const product=clean(document.getElementById("product").value), tone=document.getElementById("tone").value;
+const err=document.getElementById("errorBox"),res=document.getElementById("results"),btn=document.getElementById("genBtn");
+err.style.display="none";res.classList.remove("show");res.innerHTML="";
+if(!product){err.textContent="Please enter a product or niche.";err.style.display="block";return}
+btn.disabled=true;btn.textContent="Creating your pin...";
+setTimeout(()=>{
+const d=getSet(product),hook=hooks[Math.floor(Math.random()*hooks.length)],cta=ctas[Math.floor(Math.random()*ctas.length)];
+const titles=[`A Stylish ${d.cat} Find You’ll Love ✨`,`The Everyday ${d.cat} Upgrade 💕`,`A Simple ${d.cat} Find Worth Trying ✨`,`Your New Favorite ${d.cat} Find 💕`,`Easy ${d.cat} Style for Everyday Life ✨`,`A Practical ${d.cat} Find for Your Routine 💕`];
+const title=titles[Math.floor(Math.random()*titles.length)];
+const use=d.uses[Math.floor(Math.random()*d.uses.length)];
+let desc=`${hook}\n\n**${product}** offers a ${d.benef[0]} option with ${d.benef[1]} appeal.\n\nPerfect for:\n- Easy for ${use.toLowerCase()}\n- Simple everyday styling\n- A useful gift idea`;
+const disclosure="As an Amazon Associate I earn from qualifying purchases.";
+while((desc+"\n\n"+cta+"\n\n"+disclosure).length>500&&desc.length>30)desc=desc.slice(0,-1).trim();
+render({title,descriptionOnly:desc,cta,disclosure,boardNames:d.boards,tags:d.tags.slice(0,10)});
+btn.disabled=false;btn.textContent="Generate pin content";
+},300);
+}
+function escapeHtml(s){const d=document.createElement("div");d.textContent=s||"";return d.innerHTML}
+function safeAttr(s){return JSON.stringify(s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}
+function copyText(text,btn){const old=btn.textContent,ok=()=>{btn.textContent="Copied!";setTimeout(()=>btn.textContent=old,1500)},bad=()=>{btn.textContent="Press Ctrl+C";setTimeout(()=>btn.textContent=old,2000)};if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(text).then(ok).catch(()=>fallbackCopy(text,ok,bad));else fallbackCopy(text,ok,bad)}
+function fallbackCopy(text,ok,bad){try{const t=document.createElement("textarea");t.value=text;t.style.position="fixed";t.style.left="-9999px";document.body.appendChild(t);t.focus();t.select();const good=document.execCommand("copy");t.remove();good?ok():bad()}catch(e){bad()}}
+function format(s){let x=escapeHtml(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");return x.split(/\n+/).filter(Boolean).map((l,i)=>/^-\s?/.test(l)?`<div style="margin:2px 0">${l}</div>`:`<div style="margin:${i?"14px":"0"} 0 0">${l}</div>`).join("")}
+function render(d){
+const r=document.getElementById("results");r.innerHTML="";const full=[d.descriptionOnly,d.cta,d.disclosure].filter(Boolean).join("\n\n"),items=[["Pin Title",d.title,false],["Full Pin Description (Ready to Paste)",full,true],["Pinterest Description Only",d.descriptionOnly,true],["Affiliate Link CTA",d.cta,false],["Affiliate Disclosure",d.disclosure,false],["Suggested Board Names",(d.boardNames||[]).join("\n"),false]];
+items.forEach(([label,value,html])=>{const el=document.createElement("div");el.className="result-item";el.innerHTML=`<div class="result-head"><div><h3>${escapeHtml(label)}</h3>${label.startsWith("Full Pin")?`<div class="count">${value.length} / 500 characters</div>`:""}</div><button class="copy-btn" onclick="copyText(${safeAttr(value)},this)">Copy</button></div><div class="txt">${html?format(value):escapeHtml(value).replace(/\n/g,"<br>")}</div>`;r.appendChild(el)});
+const tags=d.tags||[],td=document.createElement("div");td.className="result-item";td.innerHTML=`<div class="result-head"><h3>Search Terms for Pinterest's Tag Picker</h3><button class="copy-btn" onclick="copyText(${safeAttr(tags.join(", "))},this)">Copy</button></div><div>${tags.map(t=>`<span class="tag-pill">${escapeHtml(t)}</span>`).join("")}</div>`;r.appendChild(td);r.classList.add("show");r.scrollIntoView({behavior:"smooth",block:"start"})
+}
+</script>
+</body>
+</html>
